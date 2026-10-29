@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mackay Timelapse - pattern analysis</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f6f7f9; color: #1c2430;
+       font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+h1 { font-size: 26px; margin: 0 0 4px; }
+h2 { font-size: 19px; margin: 36px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #dde2e8; }
+h3 { font-size: 16px; margin: 22px 0 6px; }
+p, li { max-width: 92ch; }
+table { border-collapse: collapse; margin: 10px 0 18px; font-size: 13px;
+        background: #fff; box-shadow: 0 1px 2px rgba(20,30,45,.08); }
+th, td { border: 1px solid #e2e7ee; padding: 5px 9px; text-align: left; }
+th { background: #eef2f7; font-weight: 600; }
+tbody tr:nth-child(even) { background: #fafbfd; }
+code { background: #eef2f7; padding: 1px 4px; border-radius: 3px; font-size: 90%; }
+figure { margin: 0 0 26px; background: #fff; padding: 12px; border-radius: 6px;
+         box-shadow: 0 1px 3px rgba(20,30,45,.10); }
+figure img { width: 100%; height: auto; display: block; }
+figcaption { font-size: 12px; color: #65718a; margin-top: 8px; }
+.lead { color: #65718a; margin-bottom: 22px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Mackay Timelapse - Tier 1 pattern analysis</h1>
+
+<p>Generated 2026-10-29 11:35 from <code>config.json</code> - 1152 frames, one every ~1 min, processed at 960x540.</p>
+
+<p>Every number below is derived from the frames themselves: no model weights, no manual annotation. The method is a per-frame median background, a geometric blob classifier and the temporal statistics of the resulting per-minute series.</p>
+
+<h2>1. What the capture actually covers</h2>
+
+<table>
+<tr><th>session</th><th>first frame</th><th>last frame</th><th>frames</th><th>hours</th></tr>
+<tr><td>1</td><td>Tue 27 Oct 09:35</td><td>Tue 27 Oct 12:07</td><td>153</td><td>2.5</td></tr>
+<tr><td>2</td><td>Tue 27 Oct 12:42</td><td>Wed 28 Oct 05:20</td><td>999</td><td>16.6</td></tr>
+</table>
+
+<p>Missing stretches inside/between sessions: 12:42 (35 min).</p>
+
+<p>Clock hours present: 00, 01, 02, 03, 04, 05, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 - i.e. 21 of 24. Weekdays present: Tue, Wed.</p>
+
+<h2>2. Headline numbers</h2>
+
+<ul>
+<li><strong>Activity index</strong> (pedestrian-like blobs per frame): mean 3.34 overall, 4.58 in daylight, 2.47 at night -&gt; <strong>1.85x</strong> day/night.</li>
+<li>Frames with at least one pedestrian-like blob: <strong>85%</strong> (98% by day, 77% by night).</li>
+<li>Busiest single frame: <strong>Tue 27 Oct 18:12</strong> with 17 pedestrian-like blobs and 4 vehicle-like blobs.</li>
+<li>Alive threshold (25% of the 95th percentile of the smoothed series): <strong>2.25</strong> - smoothing window 5 min, minimum dwell 10 min.</li>
+</ul>
+
+<h2>3. When the street is alive</h2>
+
+<table>
+<tr><th>from</th><th>to</th><th>min</th><th>peak at</th><th>peak blobs</th><th>mean blobs</th><th>peak smoothed</th></tr>
+<tr><td>09:35</td><td>12:00</td><td>146</td><td>11:24</td><td>6</td><td>5.96</td><td>10.0</td></tr>
+<tr><td>12:52</td><td>13:02</td><td>11</td><td>12:52</td><td>1</td><td>3.82</td><td>5.0</td></tr>
+<tr><td>13:58</td><td>15:14</td><td>77</td><td>14:35</td><td>8</td><td>6.51</td><td>12.0</td></tr>
+<tr><td>15:29</td><td>15:57</td><td>29</td><td>15:38</td><td>5</td><td>3.45</td><td>5.0</td></tr>
+<tr><td>16:02</td><td>16:11</td><td>10</td><td>16:02</td><td>2</td><td>4.70</td><td>5.0</td></tr>
+<tr><td>16:15</td><td>16:52</td><td>38</td><td>16:15</td><td>4</td><td>3.97</td><td>5.0</td></tr>
+<tr><td>17:48</td><td>19:15</td><td>88</td><td>18:05</td><td>16</td><td>8.84</td><td>16.0</td></tr>
+<tr><td>19:20</td><td>19:30</td><td>11</td><td>19:20</td><td>3</td><td>5.00</td><td>6.0</td></tr>
+<tr><td>19:45</td><td>19:55</td><td>11</td><td>19:55</td><td>3</td><td>3.45</td><td>5.0</td></tr>
+<tr><td>20:17</td><td>20:26</td><td>10</td><td>20:17</td><td>5</td><td>3.40</td><td>3.0</td></tr>
+</table>
+
+<p>10 window(s), <strong>431 minutes</strong> in total (37% of the captured time) qualify as &quot;alive&quot;. The longest is 146 min.</p>
+
+<h2>4. Short bursts (something happened)</h2>
+
+<p>A burst is a run of 2-10 minutes where the 5-minute smoothed activity index sits at least <strong>2.0 robust sigma</strong> above a <strong>+-30 minute</strong> rolling baseline *and* at least <strong>3 blobs</strong> above it. The ±30 min baseline keeps the detector from comparing a surge with itself, the excess gate keeps small night-time wobble (sigma is &lt;1.5 blobs because counts are integers) from qualifying, and the length cap hands long surges to section 3 instead.</p>
+
+<table>
+<tr><th>peak (local)</th><th>z</th><th>peak blobs</th><th>min</th><th>ROI</th><th>vs surroundings</th></tr>
+<tr><td>2026-10-27 14:39</td><td>2.7</td><td>15</td><td>3</td><td>junction</td><td>1.80x</td></tr>
+<tr><td>2026-10-27 18:07</td><td>2.7</td><td>16</td><td>9</td><td>junction</td><td>1.40x</td></tr>
+<tr><td>2026-10-27 11:33</td><td>2.0</td><td>10</td><td>3</td><td>junction</td><td>1.21x</td></tr>
+<tr><td>2026-10-27 12:56</td><td>2.0</td><td>5</td><td>3</td><td>north_walk</td><td>1.80x</td></tr>
+<tr><td>2026-10-27 19:25</td><td>2.0</td><td>8</td><td>6</td><td>junction</td><td>2.07x</td></tr>
+<tr><td>2026-10-27 21:56</td><td>2.0</td><td>5</td><td>3</td><td>junction</td><td>2.50x</td></tr>
+<tr><td>2026-10-27 22:52</td><td>2.0</td><td>6</td><td>2</td><td>junction</td><td>2.14x</td></tr>
+</table>
+
+<p>Total bursts: <strong>7</strong>. The strongest is at 2026-10-27 14:39:34 (z = 2.7). &quot;vs surroundings&quot; compares the mean activity inside the burst with the 15 minutes either side.</p>
+
+<h2>5. Vehicle stops, loading and standing traffic</h2>
+
+<p>A vehicle-like blob that is present in 2 or more consecutive frames while moving less than 12 px is a candidate stop (bus, shuttle, delivery, someone waiting at the kerb).</p>
+
+<table>
+<tr><th>from</th><th>to</th><th>min</th><th>ROI</th><th>max vehicle area</th><th>mean blobs</th></tr>
+<tr><td>09:37</td><td>09:51</td><td>15</td><td>north_walk</td><td>16365</td><td>5.40</td></tr>
+<tr><td>09:53</td><td>09:54</td><td>2</td><td>junction</td><td>13767</td><td>6.00</td></tr>
+<tr><td>09:56</td><td>10:00</td><td>5</td><td>junction</td><td>12572</td><td>4.80</td></tr>
+<tr><td>10:06</td><td>10:10</td><td>5</td><td>plaza</td><td>12405</td><td>5.60</td></tr>
+<tr><td>10:12</td><td>10:49</td><td>38</td><td>north_walk</td><td>8208</td><td>4.76</td></tr>
+<tr><td>10:51</td><td>10:54</td><td>4</td><td>north_walk</td><td>2735</td><td>7.75</td></tr>
+<tr><td>10:56</td><td>11:03</td><td>8</td><td>north_walk</td><td>1952</td><td>6.62</td></tr>
+<tr><td>11:10</td><td>11:12</td><td>3</td><td>north_walk</td><td>2691</td><td>5.00</td></tr>
+<tr><td>11:14</td><td>11:35</td><td>22</td><td>north_walk</td><td>9060</td><td>7.95</td></tr>
+<tr><td>11:44</td><td>11:52</td><td>9</td><td>north_walk</td><td>7467</td><td>6.89</td></tr>
+<tr><td>11:54</td><td>12:03</td><td>10</td><td>north_walk</td><td>6327</td><td>3.40</td></tr>
+<tr><td>12:05</td><td>12:07</td><td>3</td><td>junction</td><td>3188</td><td>3.33</td></tr>
+<tr><td>12:43</td><td>12:44</td><td>2</td><td>junction</td><td>1501</td><td>2.00</td></tr>
+<tr><td>12:46</td><td>12:47</td><td>2</td><td>junction</td><td>2323</td><td>1.50</td></tr>
+<tr><td>12:50</td><td>12:51</td><td>2</td><td>junction</td><td>4058</td><td>3.00</td></tr>
+</table>
+
+<p>Candidate stops per ROI: junction 51, north_walk 50, plaza 1.</p>
+
+<h2>6. Cycles and periodicity</h2>
+
+<p>For each long gap-free session the pedestrian series is detrended and its spectrum inspected between 5 and 240 minutes. Only the single strongest peak is tested, and the null distribution is the <strong>maximum</strong> amplitude of 200 shuffled surrogates across the whole band - testing every frequency separately would guarantee a false positive (one bin in ~200 clears p = 0.05 by chance). A peak must also correlate with the series one period later, otherwise it is shape, not rhythm.</p>
+
+<p>No peak in the 5-240 minute band beat its shuffled surrogates <strong>and</strong> correlated with itself one period later, so no cycle is reported. This is the expected result for a single day: the test is deliberately built so that the ~235 tested frequencies cannot manufacture a false cycle.</p>
+
+<h2>7. Where the people are (ROI ranking)</h2>
+
+<table>
+<tr><th>ROI</th><th>kind</th><th>mean blobs</th><th>share</th><th>day mean</th><th>night mean</th></tr>
+<tr><td>junction</td><td>road</td><td>1.94</td><td>58%</td><td>2.51</td><td>1.54</td></tr>
+<tr><td>north_walk</td><td>walk</td><td>0.76</td><td>23%</td><td>1.41</td><td>0.30</td></tr>
+<tr><td>colonnade</td><td>walk</td><td>0.36</td><td>11%</td><td>0.24</td><td>0.45</td></tr>
+<tr><td>plaza</td><td>walk</td><td>0.28</td><td>8%</td><td>0.42</td><td>0.18</td></tr>
+</table>
+
+<p>Shares are of all pedestrian-like blobs that fall inside some ROI (blobs outside every ROI are ignored).</p>
+
+<h2>8. Static presence (queues, standing groups, parked vehicles)</h2>
+
+<p>Each frame is compared with a local reference: the pixel-wise median of the surrounding 40 min. Three things happen before the two are differenced, because each of them alone would light up the whole frame: every frame&#x27;s 10-90 percentile range is stretched onto one common scale (the camera re-meters constantly, so raw grey levels are not comparable twenty minutes apart); each frame is phase-correlated and shifted onto the reference; and the local illumination field (12.0 px high-pass on a 2.0 px blur) is removed so a smooth shadow boundary is not mistaken for a queue. A pixel that stays more than 18 units of that scale (about 18% of the frame&#x27;s own contrast range) away for at least 50% of a 10-minute bin counts as occupied. Speckle is dropped and long narrow bands (kerbs, awning edges, the lip of a ramp) are discarded, so what survives has to be an object-sized patch. That is how a person who stands still, a queue or a parked van is seen even though the median background absorbs it.</p>
+
+<p>Read a share of a few percent as &quot;something stood here&quot;. Once this pipeline is calibrated an average above ~10% of the watched area, or a single ROI above ~25%, usually means the area changed appearance rather than that a quarter of it was occupied - check those bins by eye. The first bin of each session is measured against a reference that only exists on one side of it, so treat that bin with extra suspicion.</p>
+
+<table>
+<tr><th>bin start</th><th>ROIs occupied</th><th>per ROI</th></tr>
+<tr><td>2026-10-27 09:40</td><td>5.9%</td><td>plaza 16.5%, junction 2.6%, north_walk 0.0%, colonnade 0.3%</td></tr>
+<tr><td>2026-10-27 09:30</td><td>4.9%</td><td>plaza 10.3%, junction 4.4%, north_walk 0.0%, colonnade 1.7%</td></tr>
+<tr><td>2026-10-27 16:10</td><td>3.3%</td><td>plaza 0.0%, junction 3.8%, north_walk 15.1%, colonnade 0.5%</td></tr>
+<tr><td>2026-10-27 11:50</td><td>2.9%</td><td>plaza 8.6%, junction 0.8%, north_walk 0.0%, colonnade 0.0%</td></tr>
+<tr><td>2026-10-27 11:10</td><td>2.4%</td><td>plaza 6.2%, junction 0.7%, north_walk 1.3%, colonnade 0.4%</td></tr>
+<tr><td>2026-10-27 18:10</td><td>2.3%</td><td>plaza 0.8%, junction 2.8%, north_walk 0.0%, colonnade 4.7%</td></tr>
+</table>
+
+<p>Average stable occupancy across all bins: <strong>0.6%</strong> of the watched ROI area (night bins are usually empty, so a whole-day average is diluted).</p>
+
+<h2>9. Cross-check against hand-logged events</h2>
+
+<p>Nothing hand-logged yet, so there is nothing to check the automatic events against. Write <code>out/events_manual.csv</code> with columns <code>start,label</code> (e.g. <code>2026-10-27 17:40,bus stop</code>), run <code>python -m src.events</code>, and this section will list every logged moment next to the nearest automatic event with the offset in minutes - the quickest way to find out whether a detector is off or the log is.</p>
+
+<h2>10. Reading the numbers</h2>
+
+<ul>
+<li>Daylight averages <strong>4.58</strong> blobs/frame against <strong>2.28</strong> after 20:00 (<strong>2.0x</strong>). The whole night average is 2.47 because the evening peak at 18:12 falls after sunset - so read the night series as &#x27;dusk is busy, late night is quiet&#x27; rather than as a single dark number, and remember a person is a much weaker blob under streetlights than in sunlight.</li>
+<li>The street behaves as &quot;alive&quot; for <strong>431 minutes</strong> in total; the widest single window runs 09:35 -&gt; 12:00.</li>
+<li>Most stationary-vehicle candidates sit in <strong>junction</strong> (51 of 102) - the place to look first if you are hunting for a bus stop, a loading bay or a kerbside pick-up.</li>
+<li>No cycle in the 5-240 minute band survived the band-max shuffle test, so the day&#x27;s shape is better described by the alive windows of section 3 than by any periodicity.</li>
+<li>The busiest static-occupancy bin is <strong>2026-10-27 09:40</strong>: 5.9% of the watched ROI area stayed occupied for most of the bin (driven by plaza at 16.5%).</li>
+</ul>
+
+<h2>11. Limits to respect before quoting these numbers</h2>
+
+<ul>
+<li><strong>Sampling</strong>: one frame per minute is a set of snapshots, not a flow measurement. Someone crossing in 12 s appears in roughly one frame; a 45 s bus stop frequently falls between two frames. Counts are indices, not footfall.</li>
+<li><strong>Coverage</strong>: 21 of 24 clock hours on Tue, Wed only - no morning ramp, no weekend. Every &quot;time of day&quot; statement is confounded with &quot;this particular day&quot;.</li>
+<li><strong>Classifier</strong>: the pedestrian / vehicle split is purely geometric (height, width, area, solidity at 960x540). Groups merge into one blob, deep shadow and night reflections create false blobs, and a person carrying something large can be classed as a vehicle.</li>
+<li><strong>Light, not people</strong>: a moving shadow edge, a cloud edge or a lamp flicker changes pixel values exactly like a person does. The detector fights this with exposure matching, a 3 px Gaussian blur and per-pixel background matching, and the <code>diff_frac</code> panel therefore still counts illumination change as well as activity - read it next to <code>n_ped</code>, never on its own.</li>
+<li><strong>Night</strong>: below the daylight cutoff the scene is lit unevenly, so the same changes are counted twice - once from lamp and window flicker, once from real people. Permanently hot pixels are suppressed (<code>hotspot_suppress: dark</code>), but the night series is still the noisiest part of the report and is best read as &quot;something moved&quot;, not as a head count.</li>
+<li><strong>Standing still is invisible to the activity series</strong>: <code>n_ped</code> only counts blobs that moved, so a queue is absent from it by construction - section 8 is where a queue would show. Presence has the mirror-image blind spot: anything that stays put for the whole +-40 min reference window is absorbed into that reference and disappears, so a van parked all afternoon proves nothing.</li>
+<li><strong>No tracking</strong>: blobs are per frame. Nothing here measures how long an *individual* stays, only how many blob-minutes each region accumulates.</li>
+<li><strong>Correlation only</strong>: &quot;activity rose while a vehicle stood still&quot; is a co-occurrence. It is a lead for manual checking, not a causal claim.</li>
+</ul>
+
+<h2>12. Files</h2>
+
+<table>
+<tr><th>file</th><th>contents</th></tr>
+<tr><td>out/manifest.csv</td><td>one row per frame: EXIF time, brightness, noise, session</td></tr>
+<tr><td>out/activity.csv</td><td>per-frame counts, areas, flow and per-ROI counts</td></tr>
+<tr><td>out/presence.csv</td><td>stable-occupancy share per 10-min bin</td></tr>
+<tr><td>out/alive_windows.csv</td><td>when the street is busy</td></tr>
+<tr><td>out/bursts.csv</td><td>robust-z bursts</td></tr>
+<tr><td>out/dwell_events.csv</td><td>stationary-vehicle candidates</td></tr>
+<tr><td>out/periodicity.csv</td><td>spectrum peaks with shuffle p-values</td></tr>
+<tr><td>out/event_context.csv</td><td>activity inside vs around every event</td></tr>
+<tr><td>out/plots/*.png</td><td>the figures embedded in this report</td></tr>
+<tr><td>out/thumbs/burst_*.jpg</td><td>frame strips around the top bursts</td></tr>
+</table>
+<h2>Figures</h2><figure><img src="plots/01_timeline.png" alt="01 timeline"><figcaption>01 timeline</figcaption></figure>
+<figure><img src="plots/02_time_of_day.png" alt="02 time of day"><figcaption>02 time of day</figcaption></figure>
+<figure><img src="plots/03_heatmap.png" alt="03 heatmap"><figcaption>03 heatmap</figcaption></figure>
+<figure><img src="plots/04_roi_activity.png" alt="04 roi activity"><figcaption>04 roi activity</figcaption></figure>
+<figure><img src="plots/05_day_night.png" alt="05 day night"><figcaption>05 day night</figcaption></figure>
+<figure><img src="plots/06_periodicity.png" alt="06 periodicity"><figcaption>06 periodicity</figcaption></figure>
+<figure><img src="plots/07_bursts.png" alt="07 bursts"><figcaption>07 bursts</figcaption></figure>
+<figure><img src="plots/08_presence.png" alt="08 presence"><figcaption>08 presence</figcaption></figure>
+<figure><img src="plots/09_roi_overlay.png" alt="09 roi overlay"><figcaption>09 roi overlay</figcaption></figure>
+<h2>Burst montages</h2><figure><img src="thumbs/burst_01.jpg" alt="burst 01"><figcaption>burst 01</figcaption></figure>
+<figure><img src="thumbs/burst_02.jpg" alt="burst 02"><figcaption>burst 02</figcaption></figure>
+<figure><img src="thumbs/burst_03.jpg" alt="burst 03"><figcaption>burst 03</figcaption></figure>
+<figure><img src="thumbs/burst_04.jpg" alt="burst 04"><figcaption>burst 04</figcaption></figure>
+<figure><img src="thumbs/burst_05.jpg" alt="burst 05"><figcaption>burst 05</figcaption></figure>
+<figure><img src="thumbs/burst_06.jpg" alt="burst 06"><figcaption>burst 06</figcaption></figure>
+<figure><img src="thumbs/burst_07.jpg" alt="burst 07"><figcaption>burst 07</figcaption></figure>
+</main>
+</body>
+</html>
